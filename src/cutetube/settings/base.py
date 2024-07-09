@@ -16,7 +16,7 @@ import environ
 
 env = environ.Env()
 
-
+# TODO change env type to prod
 ENVIRONMENT_TYPE = ".dev"
 
 
@@ -45,17 +45,19 @@ DJANGO_APPS = [
 
 THIRD_PARTH_APPS = [
     "rest_framework",
+    "corsheaders",
 ]
 
-LOCAL_APPS = ["core_apps.common", "core_apps.stream"]
+LOCAL_APPS = ["core_apps.common", "core_apps.stream", "core_apps.stream_v2"]
 
-# Installed Apps 
+# Installed Apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTH_APPS + LOCAL_APPS
 
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -87,7 +89,7 @@ WSGI_APPLICATION = "cutetube.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Default DB 
+# Default DB
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -135,6 +137,10 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR / "mediafiles")
+
+DASH_FILE_URL = "/dash/"
+DASH_FILE_ROOT = str(BASE_DIR / "vod-media")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

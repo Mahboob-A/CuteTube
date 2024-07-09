@@ -16,51 +16,12 @@ from rest_framework import status
 from wsgiref.util import FileWrapper
 
 
+"""
+ffmpeg -i input_video.mp4 -c copy -map 0 -f dash -segment_time 4 -init_segment_time 4 -use_template 1 -use_timeline 1 -window_size 5 -remove_at_exit 1 output_segments/segment_%04d.mp4
+
+"""
+
 logger = logging.getLogger(__name__)
-
-
-@require_GET
-def stream_video_1(request):
-#     print('requst method: ', request.method)
-    video_path = os.path.join(settings.BASE_DIR, "rain-bg-vid.mp4")
-    print("video path: ", video_path)
-
-    try:
-        file_size = os.path.getsize(video_path)
-        print("file size: ", file_size)
-
-        range_header = request.META.get("HTTP_RANGE", "").strip()
-
-        print("range header: ", range_header)
-
-        if range_header:
-            ranges = range_header.replace("bytes=", "").split("-")
-            print("ranges: ", ranges)
-
-            start_bytes = int(ranges[0]) if ranges[0] else 0
-            end_bytes = int(ranges[1]) if ranges[1] else file_size - 1
-
-            if start_bytes >= file_size:
-                return HttpResponse(
-                    status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
-                    headers={"Content-Range": f"bytes */{file_size}"},
-                )
-            chunk_size = end_bytes - start_bytes + 1
-
-            response = FileResponse(
-                FileWrapper(open(video_path, "rb")),
-                content_type="video/mp4",
-                status=206,
-                as_attachment=False,
-            )
-
-            response["Accept-Ranges"] = "bytes"
-            response["Content-Length"] = str(chunk_size)
-            response["Content-Range"] = f"bytes {start_bytes}-{end_bytes}/{file_size}"
-            return response
-
-    except FileNotFoundError as e:
-        return HttpResponseNotFound("Video file not found")
 
 
 @require_GET
@@ -88,11 +49,16 @@ def stream_video(request):
             ranges = range_header.replace("bytes=", "").split("-")
             start_bytes = int(ranges[0]) if ranges[0] else 0
             end_bytes = int(ranges[1]) if ranges[1] else file_size - 1
-            print('start: ', start_bytes)
-            print('end: ', end_bytes)
+            print("start: ", start_bytes)
+            print("end: ", end_bytes)
 
             # handling invalid seek or range
-            if start_bytes > end_bytes or start_bytes < 0 or start_bytes >= file_size or end_bytes >= file_size:
+            if (
+                start_bytes > end_bytes
+                or start_bytes < 0
+                or start_bytes >= file_size
+                or end_bytes >= file_size
+            ):
                 return HttpResponse(
                     status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
                     headers={"Content-Range": f"bytes */{file_size}"},
@@ -119,8 +85,55 @@ def stream_video(request):
                 response.write(chunk)
         # print('response: ', response)
 
-        logger.info('\n\nVideo chunk write completed in response body.')
+        logger.info("\n\nVideo chunk write completed in response body.")
         return response
 
     except FileNotFoundError:
         return HttpResponseNotFound("Video file not found.")
+
+
+###############################################################
+# This view doesn't work as expected. It only streams the first chunk, hence, below I have taken different approach
+# that writes the chunks in the response body. Note that FileResponse inheris the StreamingHttpResponse
+# @require_GET
+# def stream_video_1(request):
+# #     print('requst method: ', request.method)
+#     video_path = os.path.join(settings.BASE_DIR, "rain-bg-vid.mp4")
+#     print("video path: ", video_path)
+
+#     try:
+#         file_size = os.path.getsize(video_path)
+#         print("file size: ", file_size)
+
+#         range_header = request.META.get("HTTP_RANGE", "").strip()
+
+#         print("range header: ", range_header)
+
+#         if range_header:
+#             ranges = range_header.replace("bytes=", "").split("-")
+#             print("ranges: ", ranges)
+
+#             start_bytes = int(ranges[0]) if ranges[0] else 0
+#             end_bytes = int(ranges[1]) if ranges[1] else file_size - 1
+
+#             if start_bytes >= file_size:
+#                 return HttpResponse(
+#                     status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
+#                     headers={"Content-Range": f"bytes */{file_size}"},
+#                 )
+#             chunk_size = end_bytes - start_bytes + 1
+
+#             response = FileResponse(
+#                 FileWrapper(open(video_path, "rb")),
+#                 content_type="video/mp4",
+#                 status=206,
+#                 as_attachment=False,
+#             )
+
+#             response["Accept-Ranges"] = "bytes"
+#             response["Content-Length"] = str(chunk_size)
+#             response["Content-Range"] = f"bytes {start_bytes}-{end_bytes}/{file_size}"
+#             return response
+
+#     except FileNotFoundError as e:
+#         return HttpResponseNotFound("Video file not found")
