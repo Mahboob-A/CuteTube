@@ -16,6 +16,11 @@ from rest_framework import status
 from wsgiref.util import FileWrapper
 
 
+"""
+ffmpeg -i input_video.mp4 -c copy -map 0 -f dash -segment_time 4 -init_segment_time 4 -use_template 1 -use_timeline 1 -window_size 5 -remove_at_exit 1 output_segments/segment_%04d.mp4
+
+"""
+
 logger = logging.getLogger(__name__)
 
 
