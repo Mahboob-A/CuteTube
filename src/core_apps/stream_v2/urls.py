@@ -6,6 +6,7 @@ from core_apps.stream_v2.views import (
     serve_dash_mpd_3,
     serve_dash_segment,
     serve_dash_segment_2,
+    upload_to_s3,
 )
 
 
@@ -29,4 +30,5 @@ urlpatterns = [
         serve_dash_segment_2,
         name="serve_dash_segment",
     ),
+    path("dash-2/upload-to-s3/", upload_to_s3, name="upload_to_s3"),
 ]

@@ -31,9 +31,14 @@ env.read_env(Path(str(BASE_DIR)) / f".envs/{ENVIRONMENT_TYPE}/.django")
 # core_apps entrypont
 APP_DIR = BASE_DIR / "core_apps"
 
+DEBUG = env("DJANGO_DEBUG")
+if DEBUG == "True":
+    DEBUG = True
+else:
+    DEBUG = False
+
 
 # Application definition
-
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
