@@ -31,9 +31,14 @@ env.read_env(Path(str(BASE_DIR)) / f".envs/{ENVIRONMENT_TYPE}/.django")
 # core_apps entrypont
 APP_DIR = BASE_DIR / "core_apps"
 
+DEBUG = env("DJANGO_DEBUG")
+if DEBUG == "True":
+    DEBUG = True
+else:
+    DEBUG = False
+
 
 # Application definition
-
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -146,3 +151,17 @@ DASH_FILE_ROOT = str(BASE_DIR / "vod-media")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+############################################### Packages Settings #######################################
+
+############################ CELERY CONFIG
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTECT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_RESULT_BACKEND_MAX_RETRIES = 15
+CELERY_TASK_SEND_SENT_EVENT = True
+
+if USE_TZ:
+    CELERY_TIMEZONE = TIME_ZONE

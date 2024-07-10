@@ -7,9 +7,6 @@ from .base import env  # noqa: E501
 SECRET_KEY = "django-insecure-w=&azyq3+x)_^2y6x+vf!2a+t3!llhv=68l+n6z#2p#w4t!f))"
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
@@ -55,3 +52,12 @@ LOGGING = {
     #     }
     # },
 }
+
+
+# AWS S3 Config.
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
+
+# Now you can use these variables to interact with your S3 bucket
