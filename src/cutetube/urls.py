@@ -22,5 +22,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("app/", include("core_apps.stream.urls")),
     path("app/v2/", include("core_apps.stream_v2.urls")),
-    path("app/v3/", include("core_apps.stream_v3")),
+    
+    # Rest Framework API
+    path("api/v3/", include("core_apps.stream_v3.urls")),
 ]

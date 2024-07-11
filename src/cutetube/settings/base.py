@@ -53,7 +53,7 @@ THIRD_PARTH_APPS = [
     "corsheaders",
 ]
 
-LOCAL_APPS = ["core_apps.common", "core_apps.stream", "core_apps.stream_v2"]
+LOCAL_APPS = ["core_apps.common", "core_apps.stream", "core_apps.stream_v2", "core_apps.stream_v3"]
 
 # Installed Apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTH_APPS + LOCAL_APPS
@@ -61,8 +61,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTH_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -143,7 +143,8 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR / "mediafiles")
 
-DASH_FILE_URL = "/dash/"
+# Local Video Storage Path 
+# DASH_FILE_URL = "/dash/"  # need to config if it is conflicting with the multi directory  behaviour
 DASH_FILE_ROOT = str(BASE_DIR / "vod-media")
 
 
@@ -157,9 +158,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ############################ CELERY CONFIG
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-CELERY_ACCEPT_CONTECT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
+# CELERY_ACCEPT_CONTECT = ["json"]
+# CELERY_TASK_SERIALIZER = "json"
+# CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND_MAX_RETRIES = 15
 CELERY_TASK_SEND_SENT_EVENT = True
 
