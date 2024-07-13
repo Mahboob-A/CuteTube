@@ -143,9 +143,21 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR / "mediafiles")
 
-# Local Video Storage Path 
+# Local Video Storage Path
 # DASH_FILE_URL = "/dash/"  # need to config if it is conflicting with the multi directory  behaviour
-DASH_FILE_ROOT = str(BASE_DIR / "vod-media")
+
+# Main VoD directory.
+DASH_VOD_DIR_ROOT = str(BASE_DIR / "vod-media")
+
+# VoD Subdir where local video file is stored temporarily. Under this subdir, the video files will be stored.
+DASH_LOCAL_VOD_VIDEOS_DIR_ROOT = f"{DASH_VOD_DIR_ROOT}/local-vod-videos-temp"
+
+# VoD subdir where segment files are stored temporaliry. Under this subdir, the segment dirs will be stored.
+DASH_LOCAL_VOD_SEGMENT_DIR_ROOT = f"{DASH_VOD_DIR_ROOT}/local-vod-segments-temp"
+
+# S3 bucket root dir. Under this root dir, files are structure in S3.
+# S3 File Structure: vod-media/UUID__rain-calm-video/extention/segment-files
+DASH_S3_FILE_ROOT = "vod-media"
 
 
 # Default primary key field type
@@ -163,6 +175,7 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 # CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND_MAX_RETRIES = 15
 CELERY_TASK_SEND_SENT_EVENT = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 if USE_TZ:
     CELERY_TIMEZONE = TIME_ZONE

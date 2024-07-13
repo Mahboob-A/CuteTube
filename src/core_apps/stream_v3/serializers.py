@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 import dateutil.parser
 
@@ -12,6 +11,11 @@ class VideoMetaDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VideoMetaData
-        fields = ["original_video_title", "title", "description", "duration"]
-
-     
+        fields = [
+            "custom_video_title",
+            "title",
+            "description",
+            "duration",
+            "mp4_s3_mpd_url",
+            "mov_s3_mpd_url",
+        ]
