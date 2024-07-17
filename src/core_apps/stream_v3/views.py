@@ -18,6 +18,7 @@ from celery import chain, group
 from core_apps.stream_v3.models import VideoMetaData
 from core_apps.stream_v3.serializers import VideoMetaDataSerializer
 from core_apps.stream_v3.utils import process_and_save_video_local
+from core_apps.stream_v3.paginations import VideoMetaDataPageNumberPagination
 
 # Celery Tasks
 from core_apps.stream_v3.tasks import (
@@ -38,37 +39,36 @@ class UploadVideoVoDAPI(APIView):
     permission_classes = [AllowAny]  # TODO: change to is authenticated in production.
 
     def start_dash_processing_pipeline(
-    self, 
-    video_file_extention: str,
-    video_filename_without_extention: str,
-    local_video_path_with_extention: str,
-    local_video_path_without_extention: str,
-    mp4_segment_files_output_dir: str,
-    mov_segment_files_output_dir: str,
-):
+        self,
+        video_file_extention: str,
+        video_filename_without_extention: str,
+        local_video_path_with_extention: str,
+        local_video_path_without_extention: str,
+        mp4_segment_files_output_dir: str,
+        mov_segment_files_output_dir: str,
+    ):
+        """
+        Dash Processing Pipeline Generate Entrypoint.
+        A util method to begin the dash processing pipeline.
 
-        '''
-        Dash Processing Pipeline Generate Entrypoint. 
-        A util method to begin the dash processing pipeline. 
-        
-        The Pipeline is structured as per following tasks: 
-        
-            - A single group of tasks as entrypoint (The group contains the below two tasks - an individual task and a innner group of tasks) 
-            
+        The Pipeline is structured as per following tasks:
+
+            - A single group of tasks as entrypoint (The group contains the below two tasks - an individual task and a innner group of tasks)
+
                 - transcode original video to other format - an individual task (MP4 and MOV vice-versa)
-                
+
                 - Create chain of tasks for each video file: (The below process is followed for both of the video file)
-                
-                    - The each chain has the following tasks: 
-                        - an entrypoint task to begin the video processing 
+
+                    - The each chain has the following tasks:
+                        - an entrypoint task to begin the video processing
                         - segment the video into 4 formats (360, 480, 720 and 1080 with appropriate format)
-                        - upload to S3 task: 
+                        - upload to S3 task:
                             - this task uploads the segments as a batch creating subtasks and another inner chain and a chord
-                            - a cleanup task as a callback to the chord to cleanup all local files after the upload to S3 batch processing is completed. 
-                
-                    - Start the pipeline 
-        
-        '''
+                            - a cleanup task as a callback to the chord to cleanup all local files after the upload to S3 batch processing is completed.
+
+                    - Start the pipeline
+
+        """
 
         to_be_transcode_file_extention = (
             ".mov" if video_file_extention == ".mp4" else ".mp4"
@@ -153,7 +153,12 @@ class UploadVideoVoDAPI(APIView):
 
         if "video" not in request.FILES:
             return Response(
-                {"data": {"status": "error", "detail": "No video file provided. Supported video type is .MP4 and .MOV"}},
+                {
+                    "data": {
+                        "status": "error",
+                        "detail": "No video file provided. Supported video type is .MP4 and .MOV",
+                    }
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         result = process_and_save_video_local(request=request)
@@ -162,9 +167,7 @@ class UploadVideoVoDAPI(APIView):
             video_filename_without_extention = result[
                 "video_filename_without_extention"
             ]
-            local_video_path_with_extention = result[
-                "local_video_path_with_extention"
-            ]
+            local_video_path_with_extention = result["local_video_path_with_extention"]
             local_video_path_without_extention = result[
                 "local_video_path_without_extention"
             ]
@@ -193,14 +196,14 @@ class UploadVideoVoDAPI(APIView):
             )
 
         # The Dash Processing Pipeline
-        # self.start_dash_processing_pipeline(
-        #     video_file_extention=video_file_extention,
-        #     video_filename_without_extention=video_filename_without_extention,
-        #     local_video_path_with_extention=local_video_path_with_extention,
-        #     local_video_path_without_extention=local_video_path_without_extention,
-        #     mp4_segment_files_output_dir=mp4_segment_files_output_dir,
-        #     mov_segment_files_output_dir=mov_segment_files_output_dir
-        # )
+        self.start_dash_processing_pipeline(
+            video_file_extention=video_file_extention,
+            video_filename_without_extention=video_filename_without_extention,
+            local_video_path_with_extention=local_video_path_with_extention,
+            local_video_path_without_extention=local_video_path_without_extention,
+            mp4_segment_files_output_dir=mp4_segment_files_output_dir,
+            mov_segment_files_output_dir=mov_segment_files_output_dir,
+        )
 
         try:
 
@@ -264,17 +267,55 @@ class UploadVideoVoDAPI(APIView):
 
 
 class StreamVideoVoDAPI(APIView):
-    '''Stream API for CuteTube. 
-    
+    """Stream API for CuteTube.
+
     The API provides the S3 MPD file URL to the client provided a video ID.
-    '''
+    """
 
-    def get(self, request, video_id): 
-        '''Return S3 MPD file URL of the video_ID '''
+    def get(self, request, video_id):
+        """Return S3 MPD file URL of the video_ID"""
 
-        try: 
+        try:
             video_metadata = VideoMetaData.objects.get(id=video_id)
             serializer = VideoMetaDataSerializer(video_metadata)
-            return Response({"data": {"status": "success", "data": serializer.data}}, status=status.HTTP_200_OK)
-        except VideoMetaData.DoesNotExist as err: 
-            return Response({"data": {"status": "error", "detail": f"Video ID: {video_id} is invalid."}}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"data": {"status": "success", "data": serializer.data}},
+                status=status.HTTP_200_OK,
+            )
+        except VideoMetaData.DoesNotExist as err:
+            return Response(
+                {
+                    "data": {
+                        "status": "error",
+                        "detail": f"Video ID: {video_id} is invalid.",
+                    }
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class AllVideosAPI(APIView):
+    """A simple API for all available video of cutetube. Paginated response."""
+
+    permission_classes = [AllowAny]
+    pagination_class = VideoMetaDataPageNumberPagination
+
+    def get(self, request):
+        """Get Video Metadata Paginated Response of size 10"""
+
+        video_metadatas = VideoMetaData.objects.all()
+
+        paginator = self.pagination_class()
+        paginated_videos = paginator.paginate_queryset(video_metadatas, request)
+
+        serializer = VideoMetaDataSerializer(paginated_videos, many=True)
+
+        data = {
+            "count": paginator.page.paginator.count,
+            "next": paginator.get_next_link(),
+            "previous": paginator.get_previous_link(),
+            "status": "success",
+            "data": serializer.data,
+        }
+
+        return Response({"data": data}, status=status.HTTP_200_OK)
