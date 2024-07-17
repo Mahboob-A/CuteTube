@@ -103,13 +103,13 @@ def serve_dash_segment(request, video_name, segment_name):
 def upload_to_s3(request):
     s3 = boto3.client(
         "s3",
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_S3_REGION_NAME,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID_For_VoD_Data,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY_For_VoD_Data,
+        region_name=settings.AWS_S3_REGION_NAME_For_VoD_Data,
     )
     file_path = os.path.join(settings.BASE_DIR, "hello.txt")
     print("\nfile path: ", file_path)
     s3_path = f"testing/hi-files/new-file-hello-2.txt"
-    s3.upload_file(file_path, settings.AWS_STORAGE_BUCKET_NAME, s3_path)
+    s3.upload_file(file_path, settings.AWS_STORAGE_BUCKET_NAME_For_VoD_Data, s3_path)
     # os.remove(file_path)
     return HttpResponse(status=status.HTTP_200_OK)
