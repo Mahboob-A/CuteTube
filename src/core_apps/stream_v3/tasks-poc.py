@@ -19,6 +19,16 @@ from core_apps.stream_v3.signeltons import s3_client_vod_data_singleton
 logger = logging.getLogger(__name__)
 
 
+
+'''
+
+A PoC code for Dash Processing Pipeline. The production code is in the tasks.py file.  
+
+'''
+
+
+
+
 # @shared_task
 def process_and_save_video_local(request):
     """Takes 'request' as param from a POST API to process and save the video file in local storage."""

@@ -18,98 +18,30 @@ from core_apps.stream_v3.signeltons import s3_client_vod_data_singleton
 
 logger = logging.getLogger(__name__)
 
-
-# #######################################
-def process_and_save_video_local(request):
-    """Takes 'request' as param from a POST API to process and save the video file in local storage."""
-
-    try:
-
-        raw_video_file = request.FILES["video"]
-        title = request.data.get("title")
-        description = request.data.get("description")
-        duration = request.data.get("duration")
-
-        video_file_basename = os.path.splitext(raw_video_file.name)[
-            0
-        ]  # original video name without extention (ex: calm-rain-video)
-        video_file_extention = os.path.splitext(raw_video_file.name)[
-            1
-        ]  # video extention (ex: .mp4)
-
-        video_filename_without_extention = f"{uuid.uuid4()}__{video_file_basename}"  # uuid__video_name_without_extention (Ex: uuid__calm_rain_video)
-
-        # BASE_DIR/vod-media/local-vod-videos-temp/
-        if not os.path.exists(settings.DASH_LOCAL_VOD_VIDEOS_DIR_ROOT):
-            os.mkdir(settings.DASH_LOCAL_VOD_VIDEOS_DIR_ROOT)
-
-        # BASE_DIR/vod-media/local-vod-videos-temp/uuid__rain-bg-video and without extention like:  .mp4 or .mov
-        local_video_path_without_extention = os.path.join(
-            settings.DASH_LOCAL_VOD_VIDEOS_DIR_ROOT, f"{video_filename_without_extention}"
-        )
-
-        # BASE_DIR/vod-media/local-vod-videos-temp/uuid__rain-bg-video.extention
-        local_video_path_with_extention = os.path.join(
-            settings.DASH_LOCAL_VOD_VIDEOS_DIR_ROOT,
-            f"{video_filename_without_extention}{video_file_extention}",
-        )
-
-        with open(local_video_path_with_extention, "wb+") as video_file_destination:
-            for chunk in raw_video_file.chunks():
-                video_file_destination.write(chunk)
-                print("writing")
-
-        db_data = {
-            "custom_video_title": video_filename_without_extention,  # without extention
-            "title": title,
-            "description": description,
-            "duration": duration,
-        }
-
-        # Dir creation to store mp4 and mov segment files. #
-
-        # BASE_DIR/local-vod-segments-temp/UUID__rain-bg-video/mp4
-        mp4_segment_files_output_dir = f"{settings.DASH_LOCAL_VOD_SEGMENT_DIR_ROOT}/{video_filename_without_extention}/mp4"
-
-        os.makedirs(mp4_segment_files_output_dir, exist_ok=True)
-
-        # BASE_DIR/local-vod-segments-temp/UUID__rain-bg-video/mov
-        mov_segment_files_output_dir = f"{settings.DASH_LOCAL_VOD_SEGMENT_DIR_ROOT}/{video_filename_without_extention}/mov"
-
-        os.makedirs(mov_segment_files_output_dir, exist_ok=True)
-
-        logger.info(
-            f"\n[=> Process and Save Video Local SUCCESS]: Video save to local and segment dirs for mp4 and mov Creation is Successful."
-        )
-
-        return {
-            "status": True,
-            "video_file_extention": video_file_extention,
-            "video_filename_without_extention": video_filename_without_extention,
-            "local_video_path_with_extention": local_video_path_with_extention,
-            "local_video_path_without_extention": local_video_path_without_extention,
-            "mp4_segment_files_output_dir": mp4_segment_files_output_dir, 
-            "mov_segment_files_output_dir": mov_segment_files_output_dir,
-            "db_data": db_data,
-        }
-    except Exception as e:
-        logger.error(
-            f"\n[XX Process and Save Video Local XX]: Video save to local and segment dirs for mp4 and mov Creation Failed.\nEXCEPTION: {str(e)}"
-        )
-        return {"status": False, "error": str(e)}
-
-
 # ############################# Tasks Sections # ##################################
 
 
+# Entrypoint for Dash Processing Pipeline
 @shared_task(bind=True, max_retries=3)
 def transcode_video_to_mov_or_mp4(
-    self, original_video_path_with_extention, local_path_to_transcod_video_with_extention
+    self,
+    original_video_path_with_extention,
+    local_path_to_transcod_video_with_extention,
 ):
-    '''Transcode the video into mov if original video is mp4 and vice versa.
-       
-       Note: If and Only If Transcode Task is successfull, then only the Segmentation and Upload to S3 Process will begin. 
-    '''
+    """Transcode the video into mov if original video is mp4 and vice versa.
+
+    Note: If and Only If Transcode Task is successfull, then only the Segmentation and Upload to S3 Process will begin.
+    """
+
+    logger.info(
+        f'''
+        \n[=> TRANSCODE VIDEO - DASH PIPELINE ENTRYPOINT]: Transcode Details -
+        Original Video: {original_video_path_with_extention}
+        To Be Transcoded To: {local_path_to_transcod_video_with_extention}
+        
+        Segmentation, S3 Upload and Cleanup are Awaiting ... 
+        '''
+    )
 
     command = [
         "ffmpeg",
@@ -133,26 +65,35 @@ def transcode_video_to_mov_or_mp4(
         logger.info(
             f"\n[=> DASH TRANSCODE VIDEO SUCCESS]: Task {transcode_video_to_mov_or_mp4.name}: FFmpeg command to transcode file - {original_video_path_with_extention} executed successfully"
         )
-        return {"status": "success", "transcode_video_to_mov_or_mp4_status": "video transcoded successfully"}
+        return {
+            "status": "success",
+            "transcode_video_to_mov_or_mp4_status": "video transcoded successfully",
+        }
     except subprocess.CalledProcessError as e:
         logger.error(
             f"\n[XX DASH TRANSCODE VIDEO ERROR XX]: Task {transcode_video_to_mov_or_mp4.name}: FFmpeg command to transcode file - {original_video_path_with_extention}  failed\n[Exception]: {str(e)}"
         )
-        if self.request.retries < self.max_retries: 
-            retry_in = 2 ** self.request.retries
+        if self.request.retries < self.max_retries:
+            retry_in = 2**self.request.retries
             logger.warning(
-                    f"\n[## TRANSCODE VIDEO WARNING]: Ffmpeg Command to Transcode Video Rerying in: {retry_in}.\nError: {str(e)}"
-                )
+                f"\n[## TRANSCODE VIDEO WARNING]: Ffmpeg Command to Transcode Video Rerying in: {retry_in}.\nError: {str(e)}"
+            )
             self.retry(exc=e, countdown=retry_in)
-        return {"status": "failure", "transcode_video_to_mov_or_mp4_status": "video transcode failed"} 
-    except Exception as e: 
+        return {
+            "status": "failure",
+            "transcode_video_to_mov_or_mp4_status": "video transcode failed",
+        }
+    except Exception as e:
         logger.warning(
             f"\n[## TRANSCODE VIDEO ERROR]: Ffmpeg Command to Transcode Video Failed\nError: {str(e)}"
         )
-        return {"status": "failure", "transcode_video_to_mov_or_mp4_status": "video transcod failed"}
+        return {
+            "status": "failure",
+            "transcode_video_to_mov_or_mp4_status": "video transcod failed",
+        }
 
 
-# Entrypoing task for the video processing.
+# Entrypoing for Dash Segment and S3 upload pipeline
 @shared_task
 def dash_processing_entrypoint(
     preprocessing_result,
@@ -173,6 +114,11 @@ def dash_processing_entrypoint(
 
     try:
 
+        logger.info(
+            f"\n\n[=> DASH PROCESSING ENTRYPOINT]: Segmentation, S3 Upload and Cleanup is about to Start for Video FIle: {local_video_path_with_extention}."
+        )
+
+        # This preprocessing is returned from the Transcodin Video task - which is inside a chain as individual task in the pipeline. See the view for more details.
         if preprocessing_result["status"] == "failure":
             error = preprocessing_result["error"]
             logger.error(
@@ -226,7 +172,7 @@ def dash_segment_video(preprocessing_result: dict):
     if preprocessing_result["status"] == "failure":
         error = preprocessing_result["error"]
         logger.error(
-            f"\n[XX DASH SEGMENT VIDEO  ERROR XX]: Previous Task ('dash_processing_entrypoint or transcode_video_to_mov_or_mp4') Failed.\nFail Reason: {error}\nSkipping the {dash_segment_video.name} Task."
+            f"\n[XX DASH SEGMENT VIDEO ERROR XX]: Previous Task ('dash_processing_entrypoint or transcode_video_to_mov_or_mp4') Failed.\nFail Reason: {error}\nSkipping the {dash_segment_video.name} Task."
         )
         return preprocessing_result
 
@@ -235,6 +181,10 @@ def dash_segment_video(preprocessing_result: dict):
         "local_video_path_with_extention"
     ]
 
+    logger.info(
+        f"\n\n[=> DASH SEGMENT VIDEO STARTED]: DASH Segmentation Started for Video File: {local_video_path_with_extention}"
+    )
+    
     if video_file_extention == ".mp4":
         mp4_segment_files_output_dir = preprocessing_result[
             "mp4_segment_files_output_dir"
@@ -343,7 +293,9 @@ def dash_segment_video(preprocessing_result: dict):
             f"\n[=> DASH SEGMENT VIDEO SUCCESS]: Task {dash_segment_video.name}: FFmpeg command executed successfully"
         )
         preprocessing_result["status"] = "success"
-        preprocessing_result["dash_segment_video_status"] = "segmentation is successfull"
+        preprocessing_result["dash_segment_video_status"] = (
+            "segmentation is successfull"
+        )
         return preprocessing_result
 
     except subprocess.CalledProcessError as e:
@@ -351,7 +303,9 @@ def dash_segment_video(preprocessing_result: dict):
             f"\n[XX DASH SEGMENT VIDEO SUCCESS ERROR XX]: Task {dash_segment_video.name}: FFmpeg command failed\n[Exception]: {e}"
         )
         preprocessing_result["status"] = "failure"
-        preprocessing_result["dash_segment_video_status"] = "segmentation is un-successfull"
+        preprocessing_result["dash_segment_video_status"] = (
+            "segmentation is un-successfull"
+        )
         preprocessing_result["error"] = "segmentation failed"
         preprocessing_result["dash_segment_video_error"] = str(e)
         return preprocessing_result
@@ -387,6 +341,7 @@ def init_worker_process(*args, **kwargs):
     s3_client_vod_data_singleton.initialize()
 
 
+# Sub Task to upload segments as batch upload to S3 (created by: upload_dash_segments_to_s3 task)
 @shared_task(bind=True, max_retries=5)
 def upload_segment_batch_to_s3_sub_task(self, segment_batch: list):
     """Batch upload of segments in S3.
@@ -403,11 +358,12 @@ def upload_segment_batch_to_s3_sub_task(self, segment_batch: list):
 
     """
 
-    # One s3 client per celery worker process.
+    # One s3 client per celery worker process. created using celery singal. The S3 client class is Singleton.
     s3_client = s3_client_vod_data_singleton.get_client()
 
     failed_segment_uploads = {}
-    # implement Sentry or other logging mechanism to get the failed uploads.
+    
+    # NOTE: for future updates, implement Sentry or other logging mechanism to get the failed uploads.
 
     total_segments = len(segment_batch)
     uploaded_segments = 0
@@ -439,7 +395,6 @@ def upload_segment_batch_to_s3_sub_task(self, segment_batch: list):
             )
 
         except ClientError as e:
-            failed_segment_uploads[s3_file_path] = str(e)
             logger.warning(
                 f"\n[XX SEGMENT S3 UPLOAD ERROR XX]: S3 Client Error.\nException: {str(e)}\nRetrying to upload: {local_single_segment_path}"
             )
@@ -451,6 +406,10 @@ def upload_segment_batch_to_s3_sub_task(self, segment_batch: list):
                     f"\n[## SEGMENT S3 UPLOAD WARNING ]: Chunk {os.path.basename(s3_file_path)} Couldn't be Uploaded.\nRetrying in: {retry_in}."
                 )
                 raise self.retry(exc=e, countdown=retry_in)
+
+            # only count as failed segment when the max retries is exceeded.
+            failed_segment_uploads[s3_file_path] = str(e)
+            # NOTE: For future update, implement logging mechanism to trace the failed uploads here.
 
         except Exception as e:
             failed_segment_uploads[s3_file_path] = str(e)
@@ -469,6 +428,7 @@ def upload_segment_batch_to_s3_sub_task(self, segment_batch: list):
         return "success"
 
 
+# Main Entrypoint task to upload segment to S3
 @shared_task
 def upload_dash_segments_to_s3(preprocessing_result: dict):
     """
@@ -501,6 +461,8 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
         return preprocessing_result
 
     try:
+
+
         video_file_extention = preprocessing_result["video_file_extention"]
         video_filename_without_extention = preprocessing_result[
             "video_filename_without_extention"
@@ -515,11 +477,16 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
                 "mov_segment_files_output_dir"
             ]
 
+        logger.info(
+            f"\n=> MAIN DASH SEGMENTS BATCH S3 UPLOAD STARTED]: DASH Segments Batch Creation for S3 Upload Stared for Directroy: {local_video_main_segments_dir_path}."
+        )
+
         # S3 File Structure: vod-media/UUID__rain-calm-video/extention/all-segment-files and mpd file
-        video_file_extention = video_file_extention.split(".")[
+        video_file_extention_without_dot = video_file_extention.split(".")[
             1
-        ]  # get the "mp4" or "mov" pert from ".mp4" or ".mov"
-        s3_main_file_path = f"{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/{video_file_extention}"
+        ]  # "mp4" or "mov" part from ".mp4" or ".mov"
+
+        s3_main_file_path = f"{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/{video_file_extention_without_dot}"
 
         segment_batchs = []
         current_batch = []
@@ -529,7 +496,7 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
             for file in files:
                 local_single_segment_path = os.path.join(root, file)
                 s3_file_path = os.path.join(s3_main_file_path, file)
-                
+
                 # Tuple[0]: local single segment file path.
                 # Tuple[1]: s3 file path for s3 bucket
                 current_batch.append((local_single_segment_path, s3_file_path))
@@ -548,6 +515,7 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
             for single_batch in segment_batchs
         )
 
+        # cleanup task is a callback.
         setment_upload_chord = chord(
             segment_upload_group,
             segment_upload_group_callback_and_cleanup.s(preprocessing_result),
@@ -559,6 +527,7 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
         preprocessing_result["upload_dash_segments_to_s3_error"] = (
             "group for segment upload created. awating to upload segments to s3. "
         )
+
         return preprocessing_result
 
     except Exception as e:
@@ -566,34 +535,43 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
             f"\n[XX MAIN DASH SEGMENTS BATCH S3 UPLOAD ERROR XX]: Unexpected Error Occurred.\nException: {str(e)}"
         )
         preprocessing_result["status"] = "failure"
-        preprocessing_result["upload_dash_segments_to_s3_error"] = "unexpected error occurred during creating group and chord for s3 batch segments creation."
+        preprocessing_result["upload_dash_segments_to_s3_error"] = (
+            "unexpected error occurred during creating group and chord for s3 batch segments creation."
+        )
         preprocessing_result["error"] = str(e)
         return preprocessing_result
 
 
+# S3 Upload Chord callback. Only executes after the header tasks i.e. segment upload to s3 are completed.
 @shared_task
 def segment_upload_group_callback_and_cleanup(results, preprocessing_result):
 
     # Checkpoint for S3 Upload
-    logger.info(f"\n\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Validating Segments Upload Status.")
+    logger.info(
+        f"\n\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Validating Segments Upload Status."
+    )
 
     if all(result == "success" for result in results):
         logger.info(
             f"\n[ => SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: SEGMENTS BATCH S3 UPLOAD SUCCESS: Task - {upload_dash_segments_to_s3.name} - is successfull.\nCallback: {segment_upload_group_callback_and_cleanup.name}"
         )
         preprocessing_result["status"] = "success"
-        preprocessing_result["upload_status"] = "upload success initialize for cleanup files"
+        preprocessing_result["upload_status"] = (
+            "upload success initialize for cleanup files"
+        )
     else:
         logger.error(
             f"\n[XX SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK XX]: SEGMENTS BATCH S3 UPLOAD ERROR: Task - {upload_dash_segments_to_s3.name} - Some segments failed to upload.\nCallback: {segment_upload_group_callback_and_cleanup.name}."
         )
         preprocessing_result["status"] = "failure"
-        preprocessing_result["error"] = "upload partial failure" 
+        preprocessing_result["error"] = "upload partial failure"
         preprocessing_result["upload_error"] = (
             "some segments failed to upload. initialized for cleanup"
         )
 
-    logger.info(f"\n\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Starting Cleaning Up Local Files.]")
+    logger.info(
+        f"\n\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Starting Cleaning Up Local Files.]"
+    )
 
     # To delete the local raw video file
     local_video_path_with_extention = preprocessing_result[
@@ -610,10 +588,12 @@ def segment_upload_group_callback_and_cleanup(results, preprocessing_result):
         if local_video_path_with_extention and os.path.isfile(
             local_video_path_with_extention
         ):
-            os.remove(local_video_path_with_extention)  
+            os.remove(local_video_path_with_extention)
 
             preprocessing_result["status"] = "success"
-            preprocessing_result["file_cleanup_status"] = f"video file: {local_video_path_with_extention} - is deleted. s3 upload completed." 
+            preprocessing_result["file_cleanup_status"] = (
+                f"video file: {local_video_path_with_extention} - is deleted. s3 upload completed."
+            )
 
             logger.info(
                 "\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Video File Cleanup Success."
@@ -627,9 +607,7 @@ def segment_upload_group_callback_and_cleanup(results, preprocessing_result):
         )
 
         preprocessing_result["status"] = "failure"
-        preprocessing_result["error"] = (
-            "video file cleanup failed."
-        )
+        preprocessing_result["error"] = "video file cleanup failed."
         preprocessing_result["file_cleanup_error"] = (
             f"video file: {local_video_path_with_extention} - deletion failed. Error: {str(e)}. s3 upload completed."
         )
@@ -646,7 +624,9 @@ def segment_upload_group_callback_and_cleanup(results, preprocessing_result):
             "segment files cleanup success. s3 upload completed."
         )
 
-        logger.info("\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Segment Files Cleanup Success.")
+        logger.info(
+            "\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Segment Files Cleanup Success."
+        )
 
     except (FileNotFoundError, Exception) as e:
         logger.error(
@@ -655,14 +635,9 @@ def segment_upload_group_callback_and_cleanup(results, preprocessing_result):
             """
         )
         preprocessing_result["status"] = "failure"
-        preprocessing_result["error"] = (
-            "segment_files_cleanup_error"
-        )
+        preprocessing_result["error"] = "segment_files_cleanup_error"
         preprocessing_result["segment_cleanup_error"] = (
             f"some segments deletion failed. Error: {str(e)}. s3 upload completed."
         )
-
-    print("\n\n\n\nPREPROCESSING RESULT: ", preprocessing_result)
-    print("\n\n\n")
-
+        
     return preprocessing_result
