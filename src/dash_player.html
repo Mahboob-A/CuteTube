@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DASH Video Player</title>
+    <title>CuteTube</title>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <!-- Nunito Sans Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Nunito Sans', sans-serif;
-            background-color: #f9f9f9;
+            background-color: #d9dfe4;
             margin: 0;
             padding: 0;
             display: flex;
@@ -19,7 +19,7 @@
         }
         .header {
             width: 100%;
-            background-color: #cc0000;
+            background-color: #16bdb4;
             color: white;
             padding: 10px 0;
             display: flex;
@@ -100,7 +100,7 @@
             resize: vertical;
         }
         .add-comment button {
-            background-color: #cc0000;
+            background-color: #16bdb4;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -147,16 +147,20 @@
         <div class="video-container">
             <video id="videoPlayer" controls></video>
         </div>
-        <div class="title">Anime Village Lifestyle</div>
-        <div class="description">Studio Ghibli style anime village lifestyle with soulful music.</div>
+        <div class="title">Village Soothing Rainy Day</div>
+        <div class="description">Nostalgia rainy day video with thunderstorm in a rural village. Like and Subscribe :p</div>
         <div class="comments-section">
             <div class="comment">
                 <span class="comment-author">Yurious:</span>
-                <span class="comment-text">This is a great video!</span>
+                <span class="comment-text">I love rainy day man! Thanks for sharing.</span>
             </div>
             <div class="comment">
                 <span class="comment-author">Mehboob:</span>
-                <span class="comment-text">Very relaxing, thanks for sharing!</span>
+                <span class="comment-text">Very relaxing, upload more such video!</span>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Moti Mia:</span>
+                <span class="comment-text">Aaj ekta birat fadafadi hoibo!</span>
             </div>
             <div class="add-comment">
                 <textarea placeholder="Add a public comment..."></textarea>
@@ -165,9 +169,58 @@
         </div>
     </div>
     <script>
-        const url = "http://127.0.0.1:8000/app/v2/dash/manifest.mpd";
-        const player = dashjs.MediaPlayer().create();
-        player.initialize(document.querySelector("#videoPlayer"), url, true);
+            document.addEventListener("DOMContentLoaded", function () {
+
+                // Rain Bg Video ID 
+                const videoId = "d8c5cb18-08ff-4c23-9f6d-72d4acb2fae3";
+
+                function getOS() {
+                    const userAgent = window.navigator.userAgent.toLowerCase();
+                    const platform = window.navigator.platform.toLowerCase();
+
+                    if (userAgent.indexOf("win") > -1) return "Windows";
+                    if (userAgent.indexOf("mac") > -1) return "MacOS";
+                    if (userAgent.indexOf("linux") > -1) return "Linux";
+
+                    return "Unknown OS";
+                }
+
+                fetch(`http://127.0.0.1:8000/api/v3/video/meta-data/stream/${videoId}`)
+                    .then(response => response.json())
+                    .then(responseData => {
+                        if (responseData.data.status === "success") {
+                            const data = responseData.data.data;
+                            const os = getOS();
+                            let url;
+
+                            if (os === "Windows") {
+                                url = data.mp4_s3_mpd_url;
+                            } else if (os === "MacOS" || os === "Linux") {
+                                url = data.mov_s3_mpd_url;
+                            } else {
+                                url = data.mp4_s3_mpd_url;
+                            }
+
+                            console.log(url)
+                            console.log(os)
+
+                            const player = dashjs.MediaPlayer().create();
+                            player.initialize(document.querySelector("#videoPlayer"), url, true);
+
+                            player.on("error", function (e) {
+                                console.error("DASH player error:", e);
+                            });
+
+                            document.getElementById("videoTitle").textContent = data.title;
+                            document.getElementById("videoDescription").textContent = data.description;
+                        } else {
+                            console.error("Error in API response:", responseData.data.status);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching video metadata:", error);
+                    });
+            });
     </script>
 </body>
 </html>

@@ -15,6 +15,7 @@ from rest_framework.exceptions import ValidationError
 from celery import chain, group
 
 # Local Imports
+from core_apps.stream_v3.models import VideoMetaData
 from core_apps.stream_v3.serializers import VideoMetaDataSerializer
 from core_apps.stream_v3.utils import process_and_save_video_local
 
@@ -30,7 +31,7 @@ from core_apps.stream_v3.tasks import (
 logger = logging.getLogger(__name__)
 
 
-class UploadVideoAPI(APIView):
+class UploadVideoVoDAPI(APIView):
     """API to upload video in CuteTube platform by users."""
 
     parser_classes = [MultiPartParser]
@@ -152,9 +153,9 @@ class UploadVideoAPI(APIView):
 
         if "video" not in request.FILES:
             return Response(
-                {"error": "No video file provided."}, status=status.HTTP_400_BAD_REQUEST
+                {"data": {"status": "error", "detail": "No video file provided. Supported video type is .MP4 and .MOV"}},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-
         result = process_and_save_video_local(request=request)
         if result["status"] is True:
             video_file_extention = result["video_file_extention"]
@@ -173,7 +174,7 @@ class UploadVideoAPI(APIView):
 
         elif result["status"] is False:
             logger.error(
-                f"\n[XX UploadVideoAPI ERROR XX]: Request was not satisfied. Unexpected error occurred.\nError: {result.get('error')}"
+                f"\n[XX UploadVideoVoDAPI ERROR XX]: Request was not satisfied. Unexpected error occurred.\nError: {result.get('error')}"
             )
             return Response(
                 {
@@ -191,15 +192,15 @@ class UploadVideoAPI(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # The Dash Processing Pipeline 
-        self.start_dash_processing_pipeline(
-            video_file_extention=video_file_extention,
-            video_filename_without_extention=video_filename_without_extention,
-            local_video_path_with_extention=local_video_path_with_extention,
-            local_video_path_without_extention=local_video_path_without_extention,
-            mp4_segment_files_output_dir=mp4_segment_files_output_dir,
-            mov_segment_files_output_dir=mov_segment_files_output_dir
-        )
+        # The Dash Processing Pipeline
+        # self.start_dash_processing_pipeline(
+        #     video_file_extention=video_file_extention,
+        #     video_filename_without_extention=video_filename_without_extention,
+        #     local_video_path_with_extention=local_video_path_with_extention,
+        #     local_video_path_without_extention=local_video_path_without_extention,
+        #     mp4_segment_files_output_dir=mp4_segment_files_output_dir,
+        #     mov_segment_files_output_dir=mov_segment_files_output_dir
+        # )
 
         try:
 
@@ -207,7 +208,7 @@ class UploadVideoAPI(APIView):
             # The S3 manifest.mpd file path is: vod-media/UUID__rain-calm-video/extention/manifest.mpd
             # EX: f"https://{s3_bucket_name}.s3.amazonaws.com/vod-media/{video_name}/extention/manifest.mpd"
 
-            # NOTE: In future release, create links based on the Dash Pipeline Event. 
+            # NOTE: In future release, create links based on the Dash Pipeline Event.
             mp4_s3_mpd_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/mp4/manifest.mpd"
             mov_s3_mpd_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/mov/manifest.mpd"
 
@@ -234,7 +235,7 @@ class UploadVideoAPI(APIView):
                     status=status.HTTP_201_CREATED,
                 )
             else:
-                return JsonResponse(
+                return Response(
                     {"data": {"status": "error", "detail": serializer.errors}},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -251,7 +252,7 @@ class UploadVideoAPI(APIView):
                         }
                     }
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
-            return JsonResponse(
+            return Response(
                 {
                     "data": {
                         "status": "error",
@@ -260,3 +261,20 @@ class UploadVideoAPI(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class StreamVideoVoDAPI(APIView):
+    '''Stream API for CuteTube. 
+    
+    The API provides the S3 MPD file URL to the client provided a video ID.
+    '''
+
+    def get(self, request, video_id): 
+        '''Return S3 MPD file URL of the video_ID '''
+
+        try: 
+            video_metadata = VideoMetaData.objects.get(id=video_id)
+            serializer = VideoMetaDataSerializer(video_metadata)
+            return Response({"data": {"status": "success", "data": serializer.data}}, status=status.HTTP_200_OK)
+        except VideoMetaData.DoesNotExist as err: 
+            return Response({"data": {"status": "error", "detail": f"Video ID: {video_id} is invalid."}}, status=status.HTTP_404_NOT_FOUND)
