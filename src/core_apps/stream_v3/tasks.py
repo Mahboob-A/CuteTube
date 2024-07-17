@@ -36,10 +36,12 @@ def transcode_video_to_mov_or_mp4(
     logger.info(
         f'''
         \n[=> TRANSCODE VIDEO - DASH PIPELINE ENTRYPOINT]: Transcode Details -
-        Original Video: {original_video_path_with_extention}
-        To Be Transcoded To: {local_path_to_transcod_video_with_extention}
         
-        Segmentation, S3 Upload and Cleanup are Awaiting ... 
+    Original Video: {original_video_path_with_extention}
+        
+    To Be Transcoded To: {local_path_to_transcod_video_with_extention}
+        
+    Segmentation, S3 Upload and Cleanup are Awaiting ... 
         '''
     )
 
@@ -68,6 +70,7 @@ def transcode_video_to_mov_or_mp4(
         return {
             "status": "success",
             "transcode_video_to_mov_or_mp4_status": "video transcoded successfully",
+            "trancoded_video_file": local_path_to_transcod_video_with_extention,
         }
     except subprocess.CalledProcessError as e:
         logger.error(
@@ -456,7 +459,7 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
     if preprocessing_result["status"] == "failure":
         error = preprocessing_result["error"]
         logger.error(
-            f"[XX MAIN DASH SEGMENTS BATCH S3 UPLOAD ERROR XX]: Previous Task ('dash_segment_video') Failed.\nFail Reason: {error}\nSkipping the - {upload_dash_segments_to_s3.name} Task."
+            f"\n\n[XX MAIN DASH SEGMENTS BATCH S3 UPLOAD ERROR XX]: Previous Task ('dash_segment_video') Failed.\nFail Reason: {error}\nSkipping the - {upload_dash_segments_to_s3.name} Task."
         )
         return preprocessing_result
 
@@ -478,7 +481,7 @@ def upload_dash_segments_to_s3(preprocessing_result: dict):
             ]
 
         logger.info(
-            f"\n=> MAIN DASH SEGMENTS BATCH S3 UPLOAD STARTED]: DASH Segments Batch Creation for S3 Upload Stared for Directroy: {local_video_main_segments_dir_path}."
+            f"\n\n[=> MAIN DASH SEGMENTS BATCH S3 UPLOAD STARTED]: DASH Segments Batch Creation for S3 Upload Stared for Directroy: {local_video_main_segments_dir_path}"
         )
 
         # S3 File Structure: vod-media/UUID__rain-calm-video/extention/all-segment-files and mpd file
@@ -570,7 +573,7 @@ def segment_upload_group_callback_and_cleanup(results, preprocessing_result):
         )
 
     logger.info(
-        f"\n\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Starting Cleaning Up Local Files.]"
+        f"\n\n[=> SEGMENTS UPLOAD S3 GROUP CHORD CALLBACK]: Starting Cleaning Up Local Files."
     )
 
     # To delete the local raw video file

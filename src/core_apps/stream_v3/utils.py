@@ -27,6 +27,7 @@ def process_and_save_video_local(request):
         description = request.data.get("description")
         duration = request.data.get("duration")
 
+        # The video file name is made with the original file embaded file name, not with the reqeuest body video content title.
         video_file_basename = os.path.splitext(raw_video_file.name)[
             0
         ]  # original video name without extention (ex: calm-rain-video)
@@ -55,7 +56,6 @@ def process_and_save_video_local(request):
         with open(local_video_path_with_extention, "wb+") as video_file_destination:
             for chunk in raw_video_file.chunks():
                 video_file_destination.write(chunk)
-                print("writing")
 
         db_data = {
             "custom_video_title": video_filename_without_extention,  # without extention
