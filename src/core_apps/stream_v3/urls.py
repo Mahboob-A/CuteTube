@@ -6,7 +6,7 @@ from core_apps.stream_v3.views import AllVideosAPI, StreamVideoVoDAPI, UploadVid
 urlpatterns = [
     
     # Get all videos. paginated resposne. 
-    path("all/", AllVideosAPI.as_view(), name="all_videos_paginated_api"), 
+    path("videos/all/", AllVideosAPI.as_view(), name="all_videos_paginated_api"), 
     
     # Get S3 MPD url 
     path("meta-data/stream/<str:video_id>/", StreamVideoVoDAPI.as_view(), name="stream_video_metadata_api"),

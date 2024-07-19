@@ -2,14 +2,14 @@ import logging
 
 from django.http import JsonResponse
 from django.conf import settings
-
+from django.core.exceptions import ValidationError as Django_ValidationError
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, MultiPartParserError
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError as Drf_ValidationError
 
 
 from celery import chain, group
@@ -36,7 +36,7 @@ class UploadVideoVoDAPI(APIView):
     """API to upload video in CuteTube platform by users."""
 
     parser_classes = [MultiPartParser]
-    permission_classes = [AllowAny]  # TODO: change to is authenticated in production.
+    permission_classes = [IsAuthenticated]  
 
     def start_dash_processing_pipeline(
         self,
@@ -217,15 +217,11 @@ class UploadVideoVoDAPI(APIView):
 
             db_data["mp4_s3_mpd_url"] = mp4_s3_mpd_url
             db_data["mov_s3_mpd_url"] = mov_s3_mpd_url
-            print(db_data)
 
             serializer = VideoMetaDataSerializer(data=db_data)
 
             if serializer.is_valid(raise_exception=True):
                 video_metadata = serializer.save()
-                print("\nserializer data: ", serializer.data)
-                print("video file name: ", video_filename_without_extention)
-                print("video extention: ", video_file_extention)
                 return JsonResponse(
                     {
                         "data": {
@@ -242,7 +238,7 @@ class UploadVideoVoDAPI(APIView):
                     {"data": {"status": "error", "detail": serializer.errors}},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except ValidationError as e:
+        except (Django_ValidationError, Drf_ValidationError) as e:
             error_dict = e.detail
             for key, value in error_dict.items():
                 if key == "duration":
@@ -272,6 +268,8 @@ class StreamVideoVoDAPI(APIView):
     The API provides the S3 MPD file URL to the client provided a video ID.
     """
 
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, video_id):
         """Return S3 MPD file URL of the video_ID"""
 
@@ -282,12 +280,15 @@ class StreamVideoVoDAPI(APIView):
                 {"data": {"status": "success", "data": serializer.data}},
                 status=status.HTTP_200_OK,
             )
-        except VideoMetaData.DoesNotExist as err:
+        except (
+            Django_ValidationError, Drf_ValidationError,
+            VideoMetaData.DoesNotExist,
+        ) as err:
             return Response(
                 {
                     "data": {
                         "status": "error",
-                        "detail": f"Video ID: {video_id} is invalid.",
+                        "detail": f"Video ID: '{video_id}' is invalid.",
                     }
                 },
                 status=status.HTTP_404_NOT_FOUND,

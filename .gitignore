@@ -110,6 +110,9 @@ venv.bak/
 .envs/
 vod-media/
 
+dump.rdb
+dump.rdb/
+
 # mkdocs documentation 
 /site 
 
