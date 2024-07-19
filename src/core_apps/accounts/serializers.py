@@ -47,15 +47,11 @@ class UserRegistrationAPISerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        print("\nvalidated data in serializers: ", validated_data)
         first_name = validated_data.pop("first_name")
         last_name = validated_data.pop("last_name")
         email = validated_data.pop("email")
         password = validated_data.pop("password")
 
-        print("first name: ", first_name)
-
-        print("vali dateted data: ", validated_data)
 
         return CustomUser.objects.create_user(
             first_name=first_name,

@@ -8,16 +8,13 @@ class EmailUsernameAuthBackend(ModelBackend):
 
     def authenticate(self, request, email=None, username=None, password=None, **kwargs):
         User = get_user_model()
-        print(f"in auth backend: Username: {username}    |  email: {email}", )
         if username:
             try:
-                print("in auth if username: ", username)
                 user = User.objects.get(username=username)
             except User.DoesNotExist: 
                 return None 
         elif email: 
             try:
-                print("in elif email: ", email)
                 user = User.objects.get(email=email)
             except User.DoesNotExist: 
                 return None 

@@ -217,7 +217,6 @@ class UploadVideoVoDAPI(APIView):
 
             db_data["mp4_s3_mpd_url"] = mp4_s3_mpd_url
             db_data["mov_s3_mpd_url"] = mov_s3_mpd_url
-            print(db_data)
 
             serializer = VideoMetaDataSerializer(data=db_data)
 

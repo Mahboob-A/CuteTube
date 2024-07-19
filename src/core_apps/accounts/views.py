@@ -39,7 +39,6 @@ class UserRegistrationAPI(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except IntegrityError as ie:
-            print("integrity error: ", str(ie))
             return Response(
                 {
                     "status": "error",
@@ -49,7 +48,6 @@ class UserRegistrationAPI(APIView):
             )
 
         except Exception as e:
-            print("Exception: ", str(e))
             return Response(
                 {"status": "error", "detail": "Something went wrong at our end!"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
