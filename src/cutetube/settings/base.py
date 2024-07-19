@@ -53,7 +53,7 @@ THIRD_PARTH_APPS = [
     "corsheaders",
 ]
 
-LOCAL_APPS = ["core_apps.common", "core_apps.stream", "core_apps.stream_v2", "core_apps.stream_v3"]
+LOCAL_APPS = ["core_apps.common", "core_apps.stream", "core_apps.stream_v2", "core_apps.stream_v3", "core_apps.auth"]
 
 # Installed Apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTH_APPS + LOCAL_APPS
