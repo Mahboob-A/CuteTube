@@ -24,5 +24,6 @@ urlpatterns = [
     path("app/v2/", include("core_apps.stream_v2.urls")),
     
     # Rest Framework API
-    path("api/v3/video/", include("core_apps.stream_v3.urls")),
+    path("api/v3/vod/", include("core_apps.stream_v3.urls")),
+    path("api/v3/auth/", include("core_apps.accounts.urls")), 
 ]

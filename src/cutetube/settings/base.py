@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+from datetime import timedelta
+
 import environ
 
 env = environ.Env()
@@ -53,7 +55,13 @@ THIRD_PARTH_APPS = [
     "corsheaders",
 ]
 
-LOCAL_APPS = ["core_apps.common", "core_apps.stream", "core_apps.stream_v2", "core_apps.stream_v3", "core_apps.auth"]
+LOCAL_APPS = [
+    "core_apps.common",
+    "core_apps.stream",
+    "core_apps.stream_v2",
+    "core_apps.stream_v3",
+    "core_apps.accounts",
+]
 
 # Installed Apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTH_APPS + LOCAL_APPS
@@ -143,8 +151,50 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR / "mediafiles")
 
-# Local Video Storage Path
-# DASH_FILE_URL = "/dash/"  # need to config if it is conflicting with the multi directory  behaviour
+
+###################### Auth and User Settings #########################################
+AUTH_USER_MODEL = "accounts.CustomUser"
+
+# DRF Settings
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    )
+}
+
+# Simple-JWT Settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10080),  # 7 days 
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+    "ALGORITHM": "HS256",
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+    "JTI_CLAIM": "jti",
+}
+
+
+#  Auth Backends
+AUTHENTICATION_BACKENDS = [
+    "core_apps.accounts.auth_backend.EmailUsernameAuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# ##################### DASH Settings
 
 # Main VoD directory.
 DASH_VOD_DIR_ROOT = str(BASE_DIR / "vod-media")
