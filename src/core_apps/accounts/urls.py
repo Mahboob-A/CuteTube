@@ -5,9 +5,9 @@ from core_apps.accounts.views import UserRegistrationAPI, UserLoginAPI
 
 urlpatterns = [
     path(
-        "registration/",
+        "signup/",
         UserRegistrationAPI.as_view(),
-        name="user_registration_api",
+        name="user_signup_api",
     ),
     path("login/", UserLoginAPI.as_view(), name="user_login_api"),
 ]
