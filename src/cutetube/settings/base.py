@@ -76,6 +76,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core_apps.stream_v3.RateLimitMiddleware.VODStreamAndUploadAPIRateLimitMiddleware",  # Middleware for VOD Stream and Upload API Rate LImit
 ]
 
 ROOT_URLCONF = "cutetube.urls"

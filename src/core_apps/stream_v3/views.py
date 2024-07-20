@@ -195,7 +195,7 @@ class UploadVideoVoDAPI(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # The Dash Processing Pipeline
+        '''The Dash Processing Pipeline'''
         self.start_dash_processing_pipeline(
             video_file_extention=video_file_extention,
             video_filename_without_extention=video_filename_without_extention,
