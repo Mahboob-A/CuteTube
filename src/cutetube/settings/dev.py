@@ -61,4 +61,11 @@ AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
 
 
-# Now you can use these variables to interact with your S3 bucket
+# Redis
+REDIS_CACHE_HOST = env("REDIS_CACHE_HOST")
+REDIS_CACHE_RATELIMIT_DB_INDEX = env("REDIS_CACHE_RATELIMIT_DB_INDEX")
+
+# redis cache timeout for Stream and Upload api rate limit
+REDIS_RATE_LIMIT_CACHE_TIME_IN_SECONDS = int(
+    env("REDIS_RATE_LIMIT_CACHE_TIME_IN_SECONDS")
+)

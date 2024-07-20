@@ -22,8 +22,13 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("app/", include("core_apps.stream.urls")),
     path("app/v2/", include("core_apps.stream_v2.urls")),
-    
     # Rest Framework API
+    
+    ### Stream_V3 APIs
+    
+    # Auth APIs
+    path("api/v3/auth/", include("core_apps.accounts.urls")),
+    
+    # Stream and Upload Apis
     path("api/v3/vod/", include("core_apps.stream_v3.urls")),
-    path("api/v3/auth/", include("core_apps.accounts.urls")), 
 ]

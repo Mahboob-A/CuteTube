@@ -185,7 +185,7 @@
                     return "Unknown OS";
                 }
 
-                fetch(`http://127.0.0.1:8000/api/v3/video/meta-data/stream/${videoId}`)
+                fetch(`http://127.0.0.1:8000/api/v3/vod/metadata/stream/${videoId}`)
                     .then(response => response.json())
                     .then(responseData => {
                         if (responseData.data.status === "success") {

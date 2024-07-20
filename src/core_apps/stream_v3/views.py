@@ -36,7 +36,7 @@ class UploadVideoVoDAPI(APIView):
     """API to upload video in CuteTube platform by users."""
 
     parser_classes = [MultiPartParser]
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [AllowAny]  # NOTE: As this is only backend, for proper production env with proper frontend, switch to authenticated mode.   
 
     def start_dash_processing_pipeline(
         self,
@@ -195,7 +195,7 @@ class UploadVideoVoDAPI(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # The Dash Processing Pipeline
+        '''The Dash Processing Pipeline'''
         self.start_dash_processing_pipeline(
             video_file_extention=video_file_extention,
             video_filename_without_extention=video_filename_without_extention,
@@ -268,7 +268,9 @@ class StreamVideoVoDAPI(APIView):
     The API provides the S3 MPD file URL to the client provided a video ID.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [
+        AllowAny
+    ]  # NOTE: As this is only backend, for proper production env with proper frontend, switch to authenticated mode.
 
     def get(self, request, video_id):
         """Return S3 MPD file URL of the video_ID"""
