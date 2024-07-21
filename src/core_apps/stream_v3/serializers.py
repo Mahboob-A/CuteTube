@@ -18,4 +18,6 @@ class VideoMetaDataSerializer(serializers.ModelSerializer):
             "duration",
             "mp4_s3_mpd_url",
             "mov_s3_mpd_url",
+            "mp4_gcore_cdn_mpd_url",
+            "mov_gcore_cdn_mpd_url",
         ]

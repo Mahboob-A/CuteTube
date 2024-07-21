@@ -31,6 +31,20 @@ class VideoMetaData(IDTimeStampModel):
         null=True,
         blank=True,
     )
+    
+    mp4_gcore_cdn_mpd_url = models.CharField(
+        verbose_name=_("MP4: Gcore CDN URL file."),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    mov_gcore_cdn_mpd_url = models.CharField(
+        verbose_name=_("MOV: Gcore CDN URL MPD file."),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     description = models.TextField(
         verbose_name=_("Video Description"), blank=True, null=True
