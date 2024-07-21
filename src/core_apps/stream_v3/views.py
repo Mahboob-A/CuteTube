@@ -215,8 +215,17 @@ class UploadVideoVoDAPI(APIView):
             mp4_s3_mpd_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/mp4/manifest.mpd"
             mov_s3_mpd_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/mov/manifest.mpd"
 
+            # Gcore CDN is setup. Using alcocode.site (Cloudflare DNS) for custom CDN domain.
+            mp4_gcore_cdn_mpd_url = f"https://cdn.algocode.site/{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/mp4/manifest.mpd"
+            mov_gcore_cdn_mpd_url = f"https://cdn.algocode.site/{settings.DASH_S3_FILE_ROOT}/{video_filename_without_extention}/mov/manifest.mpd"
+
+            # S3 URLs
             db_data["mp4_s3_mpd_url"] = mp4_s3_mpd_url
             db_data["mov_s3_mpd_url"] = mov_s3_mpd_url
+
+            # Gcore CDN URLs 
+            db_data["mp4_gcore_cdn_mpd_url"] = mp4_gcore_cdn_mpd_url
+            db_data["mov_gcore_cdn_mpd_url"] = mov_gcore_cdn_mpd_url
 
             serializer = VideoMetaDataSerializer(data=db_data)
 

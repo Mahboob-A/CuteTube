@@ -168,11 +168,11 @@
             </div>
         </div>
     </div>
-    <script>
+        <script>
             document.addEventListener("DOMContentLoaded", function () {
 
                 // Rain Bg Video ID 
-                const videoId = "d8c5cb18-08ff-4c23-9f6d-72d4acb2fae3";
+                const videoId = "edc8d86f-57d5-464b-866b-b0ce47742d3e";
 
                 function getOS() {
                     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -185,8 +185,22 @@
                     return "Unknown OS";
                 }
 
+                //const requestUrl = http://127.0.0.1:8000/api/v3/vod/metadata/stream/${videoId}
+                // S3 version: https://cutetube-vod-media-files.s3.ap-south-1.amazonaws.com/vod-media/15a2fcd3-c8dd-4519-b2c2-ce8a975f2c04__rain-bg-vid/mp4/manifest.mpd
+                // CDN version: https://cdn.algocode.site/vod-media/15a2fcd3-c8dd-4519-b2c2-ce8a975f2c04__rain-bg-vid/mp4/manifest.mpd
+                
                 fetch(`http://127.0.0.1:8000/api/v3/vod/metadata/stream/${videoId}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (response.status === 429) {
+                            return response.json().then(responseData => {
+                                console.log("Rate limit exceeded. Please wait before making another request.");
+                                console.log(`Wait time: ${responseData.data.wait_time}`);
+                            });
+                        } else if (!response.ok) {
+                            throw new Error("Network response was not ok.");
+                        }
+                        return response.json();
+                    })
                     .then(responseData => {
                         if (responseData.data.status === "success") {
                             const data = responseData.data.data;
@@ -194,15 +208,17 @@
                             let url;
 
                             if (os === "Windows") {
-                                url = data.mp4_s3_mpd_url;
+                                url = data.mp4_gcore_cdn_mpd_url;
                             } else if (os === "MacOS" || os === "Linux") {
-                                url = data.mov_s3_mpd_url;
+                                url = data.mov_gcore_cdn_mpd_url;
                             } else {
-                                url = data.mp4_s3_mpd_url;
+                                url = data.mp4_gcore_cdn_mpd_url;
                             }
 
-                            console.log(url)
-                            console.log(os)
+                            // Example CDN (Gcore) URL for MP4 container.
+                            //url = `https://cdn.algocode.site/vod-media/15a2fcd3-c8dd-4519-b2c2-ce8a975f2c04__rain-bg-vid/mov/manifest.mpd`
+                            console.log("CDN URL: ", url)
+                            console.log("Client OS: ", os)
 
                             const player = dashjs.MediaPlayer().create();
                             player.initialize(document.querySelector("#videoPlayer"), url, true);
@@ -221,6 +237,6 @@
                         console.error("Error fetching video metadata:", error);
                     });
             });
-    </script>
+        </script>
 </body>
 </html>
