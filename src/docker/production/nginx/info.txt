@@ -1,0 +1,3 @@
+220724, Tuesday, 0500 pm 
+
+However, in production, Nginx Proxy Manager is used. The Nginx is used for testing the production locally. 

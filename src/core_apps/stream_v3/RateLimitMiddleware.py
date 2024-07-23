@@ -79,12 +79,17 @@ class VODStreamAndUploadAPIRateLimitMiddleware:
                 rate_limit_key = (
                     f"{paths}:{client_ip}"  # /api/v3/vod/metadata/stream/:43.23.78.23
                 )
-
+                print("rate limit key: ", rate_limit_key)
                 max_tokens = limits["max_tokens"]
                 refill_rate = limits["refill_rate"]
 
                 try:
                     bucket = redis_client.get(rate_limit_key)
+                except redis.exceptions.RedisError as e:
+                    logger.error(f"Redis error: {str(e)}")
+                    raise ImproperlyConfigured(
+                        "Redis is not configured or Improperly configured."
+                    )
                 except (redis.ConnectionError, ImproperlyConfigured, Exception) as e:
                     logger.exception(
                         f"\n[Redis Import Error]: Error occurred during connecting to Redis in RateLimitMiddleware\n[EXCEPTION]: {str(e)}"

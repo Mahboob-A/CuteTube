@@ -1,0 +1,8 @@
+#!/bin/bash 
+
+set -o errexit 
+
+set -o nounset 
+
+exec celery -A cutetube.celery worker -l INFO
+ 

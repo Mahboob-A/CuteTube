@@ -5,7 +5,7 @@ from celery import Celery
 from django.conf import settings
 
 # TODO change to .prod in prodction environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cutetube.settings.dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cutetube.settings.production")
 
 app = Celery('cutetube')
 

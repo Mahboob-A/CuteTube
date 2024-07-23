@@ -1,0 +1,17 @@
+#!/bin/bash 
+
+
+set -o errexit 
+
+
+set -o nounset 
+
+
+python /home/cutetube/app/manage.py makemigrations --no-input 
+python /home/cutetube/app/manage.py migrate --no-input 
+python /home/cutetube/app/manage.py collectstatic --no-input  
+
+
+# the project is running on 9005 port. 
+exec /usr/local/bin/gunicorn cutetube.wsgi:application --bind 0.0.0.0:9005 --chdir=/home/cutetube/app
+
