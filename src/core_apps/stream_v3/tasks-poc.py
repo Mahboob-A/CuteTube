@@ -13,7 +13,7 @@ from celery.signals import worker_process_init
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError, ConnectionError
 
-from core_apps.stream_v3.signeltons import s3_client_vod_data_singleton
+from core_apps.common.singleton import s3_client_vod_data_singleton
 
 
 logger = logging.getLogger(__name__)

@@ -29,6 +29,9 @@ urlpatterns = [
     # Auth APIs
     path("api/v3/auth/", include("core_apps.accounts.urls")),
     
-    # Stream and Upload Apis
+    # VoD V3 - Celery Pipeline, S3 and CDN
     path("api/v3/vod/", include("core_apps.stream_v3.urls")),
+    
+    # VoD V4 - Celery Pipeline, S3, CDN and DRM (PlayReady Test Licence Server)
+    path("api/v4/drm/vod/", include("core_apps.stream_v4.urls")), 
 ]
