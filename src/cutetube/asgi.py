@@ -11,7 +11,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-# TODO change settings to prod in production 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cutetube.settings.dev')
+# TODO change settings to prod in production
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cutetube.settings.production")
 
 application = get_asgi_application()

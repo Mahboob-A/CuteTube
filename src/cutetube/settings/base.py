@@ -19,7 +19,7 @@ import environ
 env = environ.Env()
 
 # TODO change env type to prod
-ENVIRONMENT_TYPE = ".dev"
+ENVIRONMENT_TYPE = ".production"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -57,10 +57,11 @@ THIRD_PARTH_APPS = [
 
 LOCAL_APPS = [
     "core_apps.common",
+    "core_apps.accounts",
     "core_apps.stream",
     "core_apps.stream_v2",
     "core_apps.stream_v3",
-    "core_apps.accounts",
+    "core_apps.stream_v4",
 ]
 
 # Installed Apps
@@ -71,6 +72,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -104,12 +106,14 @@ WSGI_APPLICATION = "cutetube.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Default DB
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
+DATABASES = {"default": env.db("DATABASE_URL")}
 
 
 # Password validation
@@ -142,6 +146,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+# SITE_ID = 1
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -165,7 +171,7 @@ REST_FRAMEWORK = {
 
 # Simple-JWT Settings
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10080),  # 7 days 
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10080),  # 7 days
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -173,6 +179,7 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
+    # "SIGNING_KEY": env("SIGNING_KEY"),
     "ISSUER": None,
     "JSON_ENCODER": None,
     "JWK_URL": None,
@@ -194,6 +201,12 @@ AUTHENTICATION_BACKENDS = [
     "core_apps.accounts.auth_backend.EmailUsernameAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+
+# ##################### CORS Config
+
+# CORS_URLS_REGEX = r"^api/.*$"
+
 
 # ##################### DASH Settings
 

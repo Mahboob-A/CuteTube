@@ -1,0 +1,88 @@
+# 040424, Thursday, 11.00 am 
+services: 
+  cutetube-api: &api   # anchor of cutetube-api to reuse the cutetube-api content.  
+    restart: always 
+    build: 
+      context: . 
+      dockerfile: ./docker/production/django/Dockerfile
+    image: cutetube-api-image
+    volumes: 
+      - production_cutetube_static_volume:/app/staticfiles
+      - production_cutetube_media_volume:/app/mediafiles 
+    env_file: 
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
+    depends_on: 
+      - postgres
+      - cutetube-redis
+    command: /start  
+    networks: 
+      - production-cutetube-backend-api-network
+
+  postgres: 
+    build: 
+      context: . 
+      dockerfile: ./docker/production/postgres/Dockerfile
+    image: cutetube-pg-image
+    volumes: 
+      - production_cutetube_postgres_data:/var/lib/postgresql/data
+      - production_cutetube_postgres_data_backups:/backups
+    env_file: 
+      - ./.envs/.production/.postgres 
+    networks: 
+      - production-cutetube-backend-api-network
+
+  # use nginx-proxy-manager 
+  nginx: 
+    build: 
+      context: . 
+      dockerfile: ./docker/production/nginx/Dockerfile
+    restart: always
+    depends_on: 
+      - cutetube-api 
+    volumes: 
+      - production_cutetube_static_volume:/app/staticfiles
+      - production_cutetube_media_volume:/app/mediafiles 
+    ports: 
+      - "8080:80"
+    networks: 
+      - production-cutetube-backend-api-network
+    
+  cutetube-redis: 
+    image: redis:7-alpine
+    networks: 
+      - production-cutetube-backend-api-network
+
+  cutetube-celery-worker:   # using anchor of api service. 
+    <<: *api 
+    image: cutetube-celery-image
+    command: /start-celeryworker
+    networks: 
+      - production-cutetube-backend-api-network
+    
+  flower: 
+    <<: *api 
+    image: cutetube-flower-image
+    command: /start-flower
+    volumes: 
+      - production_cutetube_flower_data:/data
+    ports: 
+      - "5555:5555"
+    networks: 
+      - production-cutetube-backend-api-network
+    
+
+# TODO create the network in the server. 
+networks: 
+  production-cutetube-backend-api-network: 
+    external: true 
+  
+
+volumes: 
+  production_cutetube_static_volume: {}
+  production_cutetube_media_volume: {}
+  production_cutetube_postgres_data: {}
+  production_cutetube_postgres_data_backups: {}
+  production_cutetube_flower_data: {}
+  
+  
