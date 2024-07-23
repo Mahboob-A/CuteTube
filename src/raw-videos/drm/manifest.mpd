@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Generated with https://github.com/shaka-project/shaka-packager version v3.2.0-53b8668-release-->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns:cenc="urn:mpeg:cenc:2013" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT2S" type="static" mediaPresentationDuration="PT34.734699S">
+  <BaseURL>https%3A%2F%2Fcdn.algocode.site%2F</BaseURL>
+  <Period id="0">
+    <AdaptationSet id="0" contentType="video" width="1280" height="720" frameRate="30000/1001" subsegmentAlignment="true" par="16:9">
+      <SupplementalProperty schemeIdUri="urn:mpeg:mpegB:cicp:TransferCharacteristics" value="1"/>
+      <ContentProtection value="cenc" schemeIdUri="urn:mpeg:dash:mp4protection:2011" cenc:default_KID="bee86cab-bd8f-410b-890d-dc8f86fd2db2"/>
+      <ContentProtection schemeIdUri="urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b">
+        <cenc:pssh>AAAANHBzc2gBAAAAEHfv7MCyTQKs4zweUuL7SwAAAAG+6GyrvY9BC4kN3I+G/S2yAAAAAA==</cenc:pssh>
+      </ContentProtection>
+      <Representation id="0" bandwidth="7614349" codecs="avc1.64001f" mimeType="video/mp4" sar="1:1">
+        <BaseURL>video_1080p.mp4</BaseURL>
+        <SegmentBase indexRange="1189-1280" timescale="30000">
+          <Initialization range="0-1188"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="audio" subsegmentStartsWithSAP="1" subsegmentAlignment="true">
+      <ContentProtection value="cenc" schemeIdUri="urn:mpeg:dash:mp4protection:2011" cenc:default_KID="bee86cab-bd8f-410b-890d-dc8f86fd2db2"/>
+      <ContentProtection schemeIdUri="urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b">
+        <cenc:pssh>AAAANHBzc2gBAAAAEHfv7MCyTQKs4zweUuL7SwAAAAG+6GyrvY9BC4kN3I+G/S2yAAAAAA==</cenc:pssh>
+      </ContentProtection>
+      <Representation id="1" bandwidth="251455" codecs="mp4a.40.2" mimeType="audio/mp4" audioSamplingRate="44100">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <BaseURL>audio.mp4</BaseURL>
+        <SegmentBase indexRange="1043-1182" timescale="44100">
+          <Initialization range="0-1042"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

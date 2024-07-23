@@ -112,6 +112,7 @@ vod-media/
 
 dump.rdb
 dump.rdb/
+db.sqlite3-staged
 
 # mkdocs documentation 
 /site 
