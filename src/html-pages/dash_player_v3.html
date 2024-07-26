@@ -172,7 +172,7 @@
             document.addEventListener("DOMContentLoaded", function () {
 
                 // Rain Bg Video ID 
-                const videoId = "edc8d86f-57d5-464b-866b-b0ce47742d3e";
+                const videoId = "4fab8d1b-2697-4429-878a-2802efd10d62";
 
                 function getOS() {
                     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -189,7 +189,7 @@
                 // S3 version: https://cutetube-vod-media-files.s3.ap-south-1.amazonaws.com/vod-media/15a2fcd3-c8dd-4519-b2c2-ce8a975f2c04__rain-bg-vid/mp4/manifest.mpd
                 // CDN version: https://cdn.algocode.site/vod-media/15a2fcd3-c8dd-4519-b2c2-ce8a975f2c04__rain-bg-vid/mp4/manifest.mpd
                 
-                fetch(`http://127.0.0.1:8080/api/v3/vod/metadata/stream/${videoId}`)
+                fetch(`http://127.0.0.1:8080/api/v3/vod/metadata/stream/${videoId}/`)
                     .then(response => {
                         if (response.status === 429) {
                             return response.json().then(responseData => {

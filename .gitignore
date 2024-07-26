@@ -110,6 +110,7 @@ venv.bak/
 .envs/
 vod-media/
 
+dev.yml
 dump.rdb
 dump.rdb/
 db.sqlite3-staged
