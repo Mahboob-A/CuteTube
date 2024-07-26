@@ -54,7 +54,9 @@ docker-logs-postgres:
 
 
 
+# docker compose -p d_v -f dev.yml up --build -d --remove-orphans
 
+# docker compose -p d_v -f dev.yml down -v
 
 # ### Django Commands
 

@@ -10,48 +10,51 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 ADMIN_URL = env("ADMIN_URL")
 
 
+# NOTE For actual Production. (as no server available and all 3 servers are occupied, can't deploy the project right now.) 
+# Change the below settings accordingly at deploy time, if server is managed. 
+
 
 # Django security settings.
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["cutetube.algocode.site"])
-# ALLOWED_HOSTS = ["127.0.0.1"]
+# ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["cutetube.algocode.site"])
+ALLOWED_HOSTS = ["127.0.0.1"]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8000",
-#     "http://127.0.0.1:8000",
-#     "http://127.0.0.1:5500",
-#     "http://127.0.0.1:8080",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:8080",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://cutetube.algocode.site",
     "https://algocode.site",
-    # "http://127.0.0.1:8000",
-    # "http://127.0.0.1:5500",
-    # "http://127.0.0.1:8080",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:8080",
 ]
 
 
 # CORS_ALLOW_ALL_ORIGINS = True
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-SECURE_SSL_REDIRECT = env("DJANGO_SECURE_SSL_REDIRECT", default=True)
+# SECURE_SSL_REDIRECT = env("DJANGO_SECURE_SSL_REDIRECT", default=True)
 
-# TODO check if cookie is used. else false.
-SESSION_COOKIE_SECURE = True
+# # TODO check if cookie is used. else false.
+# SESSION_COOKIE_SECURE = True
 
-CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 
-# TODO caution. 518400 seconds as 6 days. use wisely.
-SECURE_HSTS_SECONDS = 60
+# # TODO caution. 518400 seconds as 6 days. use wisely.
+# SECURE_HSTS_SECONDS = 60
 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
-    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True
-)
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+#     "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True
+# )
 
-SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
-    "DJANGO_SECURE_CONTENT_TYPE_NOSNIFF", default=True
-)
+# SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
+#     "DJANGO_SECURE_CONTENT_TYPE_NOSNIFF", default=True
+# )
 
 # Static file content host
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

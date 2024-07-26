@@ -53,6 +53,7 @@ DJANGO_APPS = [
 THIRD_PARTH_APPS = [
     "rest_framework",
     "corsheaders",
+    "drf_yasg", 
 ]
 
 LOCAL_APPS = [
@@ -211,7 +212,7 @@ AUTHENTICATION_BACKENDS = [
 # ##################### DASH Settings
 
 # Main VoD directory.
-DASH_VOD_DIR_ROOT = str(BASE_DIR / "vod-media")
+DASH_VOD_DIR_ROOT = str(BASE_DIR / "vod-media-files")  # vod-media-files is also the volume mount point. See compose and dockerfile. 
 
 # VoD Subdir where local video file is stored temporarily. Under this subdir, the video files will be stored.
 DASH_LOCAL_VOD_VIDEOS_DIR_ROOT = f"{DASH_VOD_DIR_ROOT}/local-vod-videos-temp"

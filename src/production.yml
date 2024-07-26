@@ -1,4 +1,7 @@
 # 040424, Thursday, 11.00 am 
+# Docker Compose version v2.29.1
+# Docker version 27.1.1, build 6312585
+
 services: 
   cutetube-api: &api   # anchor of cutetube-api to reuse the cutetube-api content.  
     restart: always 
@@ -7,8 +10,9 @@ services:
       dockerfile: ./docker/production/django/Dockerfile
     image: cutetube-api-image
     volumes: 
-      - production_cutetube_static_volume:/app/staticfiles
-      - production_cutetube_media_volume:/app/mediafiles 
+      - production_cutetube_vod_media_files:${APP_HOME}/app/vod-media-files  # APP_HOME: /home/cutetube
+      - production_cutetube_static_volume:${APP_HOME}/app/staticfiles
+      - production_cutetube_media_volume:${APP_HOME}/app/mediafiles 
     env_file: 
       - ./.envs/.production/.django
       - ./.envs/.production/.postgres
@@ -32,7 +36,7 @@ services:
     networks: 
       - production-cutetube-backend-api-network
 
-  # use nginx-proxy-manager 
+  # TODO use nginx-proxy-manager in Production
   nginx: 
     build: 
       context: . 
@@ -50,6 +54,8 @@ services:
     
   cutetube-redis: 
     image: redis:7-alpine
+    container_name: cutetube-redis-container
+    mem_limit: 50m 
     networks: 
       - production-cutetube-backend-api-network
 
@@ -57,9 +63,10 @@ services:
     <<: *api 
     image: cutetube-celery-image
     command: /start-celeryworker
-    networks: 
-      - production-cutetube-backend-api-network
-    
+    # mem_limit: 400m # also allocates same amount of swap  | can't use. server has only 1GB RAM and allocating 400MB receives SIGKILL.
+    # As inherited from cutetube-api service, everything is available as cutetube-api service in this service 
+    #  Using the same external volume as the cutetube-api (djanog app) as celery needs access to the vod data to process 
+          
   flower: 
     <<: *api 
     image: cutetube-flower-image
@@ -68,8 +75,7 @@ services:
       - production_cutetube_flower_data:/data
     ports: 
       - "5555:5555"
-    networks: 
-      - production-cutetube-backend-api-network
+    
     
 
 # TODO create the network in the server. 
@@ -84,5 +90,7 @@ volumes:
   production_cutetube_postgres_data: {}
   production_cutetube_postgres_data_backups: {}
   production_cutetube_flower_data: {}
-  
+  production_cutetube_vod_media_files: 
+    external: true 
+
   

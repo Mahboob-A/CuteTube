@@ -49,16 +49,21 @@ ENV BUILD_ENV ${BUILD_ENVIRONMENT}
 
 WORKDIR ${APP_HOME}
 
-#  create staticfiles dir, and give permission of the dir to the user. 
-RUN mkdir -p ${APP_HOME}/staticfiles ${APP_HOME}/mediafiles && \
-        chown -R cutetube:cutetube ${APP_HOME}/staticfiles ${APP_HOME}/mediafiles && \
-        chmod -R 775 ${APP_HOME}/staticfiles ${APP_HOME}/mediafiles
+
+
+#  ${APP_HOME}/vod-media-files is the External volume mount point. See docker compose file for the mount point. 
+RUN mkdir -p ${APP_HOME}/staticfiles ${APP_HOME}/mediafiles ${APP_HOME}/vod-media-files && \
+        chown -R cutetube:cutetube ${APP_HOME}/staticfiles ${APP_HOME}/mediafiles ${APP_HOME}/vod-media-files && \
+        chmod -R 775 ${APP_HOME}/staticfiles ${APP_HOME}/mediafiles ${APP_HOME}/vod-media-files
+
+
 
 
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
         libpq-dev \
         gettext netcat \
+        ffmpeg \
         && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
         && rm -rf /var/lib/apt/lists/*
 
@@ -80,28 +85,28 @@ RUN sed -i 's/\r$//g' /entrypoint.sh
 # checks the postgres db availability 
 RUN chmod +x /entrypoint.sh
 
-# copy the start script as the user 
+
 COPY --chown=cutetube:cutetube ./docker/production/django/start /start
 
 RUN sed -i 's/\r$//g' /start 
 
-# give the user execution permission (+x) with chmod to /entrypoiny dir  
+
 RUN chmod +x /start 
 
-# copy elery worker script as the user
+
 COPY --chown=cutetube:cutetube ./docker/production/django/celery/worker/start /start-celeryworker
 
 RUN sed -i 's/\r$//g' /start-celeryworker
 
 RUN chmod +x /start-celeryworker
 
-# copy the flower script as the user. it monitors the celery worker. 
-# TODO check if project is running  and working as expected with chown, else do not chage the ownership of flower. 
+
 COPY --chown=cutetube:cutetube ./docker/production/django/celery/flower/start /start-flower
 
 RUN sed -i 's/\r$//g' /start-flower
 
 RUN chmod +x /start-flower
+
 
 COPY --chown=cutetube:cutetube . ${APP_HOME} 
 
