@@ -92,7 +92,11 @@ The _CuteTube_ platform is backed by the following core technologies -
 >
 >> You can learn more on API Documentation in the `API Guideline - CuteTube APIs` section.
 
-**D. Documentation**
+**D. Containerized Solution**
+
+> The project is fully containerized using docker. A `make docker-up` would run the full system locally provided the `.envs`. 
+
+**E. Documentation**
 
 > Please visit the documentation page `localhost:8080/doc/` for more information related to API documentation. 
 > 
@@ -242,6 +246,10 @@ However, I have already attached a detailed video in the `Watch In Action` secti
 
 ###  Registration in the CuteTube
 
+>
+> Why `localhost`? You probably already know the reason from the **`Deployment`** section!
+>
+
 
 ```http
     POST https://localhost:8080/api/v3/auth/signup/
@@ -281,7 +289,7 @@ However, I have already attached a detailed video in the `Watch In Action` secti
 ###  Stream Video on CuteTube
 
 >
->> Why `localhost`? You probably already know the reason from the **`Deployment`** section!
+> Why `localhost`? You probably already know the reason from the **`Deployment`** section!
 >
 
 ```http
@@ -297,13 +305,13 @@ However, I have already attached a detailed video in the `Watch In Action` secti
 
 
 </details><details>
-  <summary><h3 align="center">API Guideline - Registration in CuteTube</h3></summary>
+  <summary><h3 align="center">API Guideline - Upload Video on CuteTube</h3></summary>
 
 
 ###  Upload Video on CuteTube
 
 >
->> Why `localhost`? You probably already know the reason from the **`Deployment`** section!
+> Why `localhost`? You probably already know the reason from the **`Deployment`** section!
 >
 
 ```http
