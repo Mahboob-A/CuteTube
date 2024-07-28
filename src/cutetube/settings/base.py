@@ -14,6 +14,8 @@ from pathlib import Path
 
 from datetime import timedelta
 
+import sentry_sdk
+
 import environ
 
 env = environ.Env()
@@ -107,14 +109,14 @@ WSGI_APPLICATION = "cutetube.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Default DB
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
-DATABASES = {"default": env.db("DATABASE_URL")}
+# DATABASES = {"default": env.db("DATABASE_URL")}
 
 
 # Password validation
@@ -180,7 +182,7 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
-    # "SIGNING_KEY": env("SIGNING_KEY"),
+    "SIGNING_KEY": env("SIGNING_KEY"),
     "ISSUER": None,
     "JSON_ENCODER": None,
     "JWK_URL": None,
@@ -244,3 +246,16 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 if USE_TZ:
     CELERY_TIMEZONE = TIME_ZONE
+
+
+########################################Sentry Config. ###########################
+
+SENTRY_DSN_URL = env("SENTRY_DSN_URL")
+
+sentry_sdk.init(
+    dsn=SENTRY_DSN_URL,
+     
+    traces_sample_rate=1.0,
+
+    profiles_sample_rate=1.0,
+)

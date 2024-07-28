@@ -1,6 +1,11 @@
 from django.urls import path
 
-from core_apps.stream_v3.views import AllVideosAPI, StreamVideoVoDAPI, UploadVideoVoDAPI
+from core_apps.stream_v3.views import (
+    AllVideosAPI,
+    StreamVideoVoDAPI,
+    UploadVideoVoDAPI,
+    trigger_sentry_error,
+)
 
 
 urlpatterns = [
@@ -13,4 +18,8 @@ urlpatterns = [
     
     # Upload a video 
     path("initiate-task/upload/", UploadVideoVoDAPI.as_view(), name="uplaod_video_api"),
+    
+    
+    # Sentry Error Trigger 
+    path("sentry-error/", trigger_sentry_error, name="sentry_error_trigger"), 
 ]

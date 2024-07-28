@@ -331,3 +331,9 @@ class AllVideosAPI(APIView):
         }
 
         return Response({"data": data}, status=status.HTTP_200_OK)
+
+
+def trigger_sentry_error(request):
+    division_by_zero = 1 / 0
+    print("request done: ", request)
+    return JsonResponse({"status": "OK"}, status=status.HTTP_200_OK)
