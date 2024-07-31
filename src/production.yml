@@ -1,9 +1,9 @@
-# 040424, Thursday, 11.00 am 
+# 270424, Saturday, 11.00 am 
 # Docker Compose version v2.29.1
 # Docker version 27.1.1, build 6312585
 
 services: 
-  cutetube-api: &api   # anchor of cutetube-api to reuse the cutetube-api content.  
+  cutetube-api: &api   
     restart: always 
     build: 
       context: . 
@@ -59,7 +59,7 @@ services:
     networks: 
       - production-cutetube-backend-api-network
 
-  cutetube-celery-worker:   # using anchor of api service. 
+  cutetube-celery-worker:   
     <<: *api 
     image: cutetube-celery-image
     command: /start-celeryworker

@@ -36,7 +36,9 @@ class UploadVideoVoDAPI(APIView):
     """API to upload video in CuteTube platform by users."""
 
     parser_classes = [MultiPartParser]
-    permission_classes = [AllowAny]  # NOTE: As this is only backend, for proper production env with proper frontend, switch to authenticated mode.   
+    permission_classes = [
+        IsAuthenticated
+    ]  
 
     def start_dash_processing_pipeline(
         self,
@@ -223,7 +225,7 @@ class UploadVideoVoDAPI(APIView):
             db_data["mp4_s3_mpd_url"] = mp4_s3_mpd_url
             db_data["mov_s3_mpd_url"] = mov_s3_mpd_url
 
-            # Gcore CDN URLs 
+            # Gcore CDN URLs
             db_data["mp4_gcore_cdn_mpd_url"] = mp4_gcore_cdn_mpd_url
             db_data["mov_gcore_cdn_mpd_url"] = mov_gcore_cdn_mpd_url
 
