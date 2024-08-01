@@ -1,15 +1,15 @@
                          
 <br/>
 <div align="center">
-<a href="https://prostream-gamma.vercel.app/">
+<a href="https://youtu.be/5RQiOE0xpWI">
 <img src="https://github.com/user-attachments/assets/8ed70f78-0e5a-4515-a386-1e29182752af" alt="Logo" width="700" height="400">
 </a>
-<h3 align="center">Stream and Upload Video Powered by Proven Celery Pipeline, S3, Gcore CDN and PlayReady DRM<a href="https://prostream-gamma.vercel.app/"  target="_"><strong> Watch in Action</strong></a></h3>
+<h3 align="center">Stream and Upload Video Powered by Proven Celery Pipeline, S3, Gcore CDN and PlayReady DRM<a href="https://www.youtube.com/watch?v=5RQiOE0xpWI"  target="_"><strong> Watch in Action</strong></a></h3>
 <p align="center">
-CuteTube is a Video On Demand (VoD) Platform Just Like  <a href="https://www.youtube.com/" target="_"><strong>YouTube</strong></a>
+CuteTube is a Video On Demand (VoD) Platform Just Like  <a href="https://www.youtube.com/watch?v=5RQiOE0xpWI" target="_"><strong>YouTube</strong></a>
 <br/>
 <br/>
-<a href="https://github.com/Mahboob-A/algocode-auth"  target="_"><strong>Read the blog »</strong></a>
+<a href="https://imehboob.medium.com/my-experience-building-a-leetcode-like-online-judge-and-how-you-can-build-one-7e05e031455d"  target="_"><strong>Read the blog »</strong></a>
 <br/>
 <br/>
 </p>
@@ -40,7 +40,7 @@ The _CuteTube_ platform is backed by the following core technologies -
 >> There is another version of  `CuteTube` as `Microserivices` where I have separated services based on concern. The microservices version of `CuteTube` is more `robust` and `scalable` solution with wider range of technologies implemented. 
 > 
 >>
->>> Please see the `CuteTube` microservices version here - <a href="https://github.com/Mahboob-A/algocode-auth" target="_">CuteTube Microservices</a>
+>>> Please see the `CuteTube` microservices version here - <a href="https://github.com/Mahboob-A/algocode" target="_">CuteTube Microservices</a>
 
 **B. Versioning of CuteTube**
 
@@ -76,6 +76,8 @@ The _CuteTube_ platform is backed by the following core technologies -
 >
 
 **C. Rate Limit Alert**
+
+>> Note that the project is not deployed as the celery pipeline takes too much of resources and a free server can't handle it!! 
 
 > The API endpoint to for stream and upload video in the _CuteTube_ platform is Rate Limited. 
 >> ```http 
@@ -163,8 +165,28 @@ However, I have already attached a detailed video in the `Watch In Action` secti
 
 - Watch on YouTube
 
-<a href="https://www.youtube.com/watch?v=TbiRWL-11Fo&t=990s" target="_blank">
-  <img src="https://img.youtube.com/vi/TbiRWL-11Fo/0.jpg" alt="Watch the video">
+##### Timeline: 
+
+1. Introduction: 00:00 
+
+2. HLD of CuteTube: 09:00  
+
+3. Upload Video to CuteTube: 24:30 
+
+4. Work Distribution on Celery Pipeline: 37:00 
+
+5. S3 Storage of DASH Segments: 46:00 
+
+6. DASH Player: 48:00 
+
+7. Watch the Uploaded Video: 50:00 
+
+8. Rate Limit: 52:15 
+
+9. Flower for Celery Monitoring: 54:15 
+
+<a href="https://www.youtube.com/watch?v=5RQiOE0xpWI" target="_blank">
+  <img src="https://img.youtube.com/vi/5RQiOE0xpWI/0.jpg" alt="Watch the video">
 </a>
 
 <br>
