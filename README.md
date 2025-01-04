@@ -11,9 +11,7 @@ CuteTube is a Video On Demand (VoD) Platform Just Like  <a href="https://www.you
   <p style="text-align: center;">
   The microservices version of CuteTube is Movio. Check it <a href="https://github.com/Mahboob-A/movio/" target="_blank"><strong>here »</strong></a>
 </p>
-<br/>
 <a href="https://imehboob.medium.com/my-experience-building-a-leetcode-like-online-judge-and-how-you-can-build-one-7e05e031455d"  target="_"><strong>Read the blog »</strong></a>
-<br/>
 <br/>
 </p>
 </div>
