@@ -7,6 +7,10 @@
 <h3 align="center">Stream and Upload Video Powered by Proven Celery Pipeline, S3, Gcore CDN and PlayReady DRM<a href="https://www.youtube.com/watch?v=5RQiOE0xpWI"  target="_"><strong> Watch in Action</strong></a></h3>
 <p align="center">
 CuteTube is a Video On Demand (VoD) Platform Just Like  <a href="https://www.youtube.com/watch?v=5RQiOE0xpWI" target="_"><strong>YouTube</strong></a>
+  <br/>
+  <p style="text-align: center;">
+  The microservices version of CuteTube is Movio. Check it <a href="https://github.com/Mahboob-A/movio/" target="_blank"><strong>here »</strong></a>
+</p>
 <br/>
 <br/>
 <a href="https://imehboob.medium.com/my-experience-building-a-leetcode-like-online-judge-and-how-you-can-build-one-7e05e031455d"  target="_"><strong>Read the blog »</strong></a>
